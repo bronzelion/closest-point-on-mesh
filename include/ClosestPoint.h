@@ -4,8 +4,8 @@
 #include <math.h>
 #include <limits>
 
-#define INFINITY std::numeric_limits<float>::infinity();
-
+#define INFINITY_FLOAT std::numeric_limits<float>::infinity();
+#define INFINITY_INT std::numeric_limits<int>::infinity();
 using namespace math;
 using namespace std;
 
@@ -17,7 +17,8 @@ public:
 	Vec3f min_vertex;
 	Vec3f min_vertex_idx;
 
-	std::vector<Vec3f> vlist_in_sphere;
+	set<int> vlist_in_sphere;
+	set<int> edge_in_sphere;
 	
 
 	ClosestPoint(Mesh &m){
@@ -32,5 +33,7 @@ public:
 	pair<float,Vec3f> minVertexDistance(const Vec3f &point, float maxRadius);
 	pair<float,Vec3f> minEdgeDistance(const Vec3f &point, float maxRadius);
 	pair<float,Vec3f> minFaceDistance(const Vec3f &point, float maxRadius);
+
+	vector<Face> fetchFacesinSphere();
 	
 };

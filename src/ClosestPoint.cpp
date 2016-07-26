@@ -15,6 +15,10 @@ Vec3f ClosestPoint::operator () (const Vec3f &queryPoint, float maxRadius){
 	 or a point in the interior of a trianlge. 
 	 Returns: min(Vertex,EdgePoint, FacePoint)
 	*/
+	cout<< "Query Point ";
+	cout << queryPoint.x <<" "<< queryPoint.y << " "<< queryPoint.z;
+	cout <<", Max Radius " << maxRadius<<endl;
+
 	vector< pair <float,Vec3f> > closestPoints;
 
 	closestPoints.push_back( minVertexDistance(queryPoint,maxRadius));
@@ -24,11 +28,13 @@ Vec3f ClosestPoint::operator () (const Vec3f &queryPoint, float maxRadius){
 	std::sort(closestPoints.begin(), closestPoints.end(),comp);
 	Vec3f result = closestPoints[0].second;
 
+	cout <<"-----------------------------------------------------------------"<<endl;
 	if (result == NULL)
-		cout<< "No Closest Point on mesh found within given maxRadius";
+		cout<< "No Closest Point on mesh found within given maxRadius"<<endl;
 	else
-		cout << "ClOSEST POINT : "<< result.x<< " "<< result.y<< " "<< result.z;
-
+		cout << "CLOSEST POINT ON MESH: "<< result.x<< " "<< result.y<< " "<< result.z<<endl;
+	cout <<"-----------------------------------------------------------------"<<endl;
+	cout<<endl;
 	return result;
 }
 
@@ -38,11 +44,15 @@ pair<float,Vec3f> ClosestPoint::minFaceDistance(const Vec3f &point, float maxRad
 	Vec3f min_face = NULL;
 	int faceID;
 
-	for(int i = 0; i<mesh.face_list.size(); i++){
-		Vec3f v0 = mesh.face_list[i].v1;
-		Vec3f v1 = mesh.face_list[i].v2;
-		Vec3f v2 = mesh.face_list[i].v3;
+	/* Find only the faces which have edges/vertices within search radius*/
+	std::vector<Face> faces_in_sphere = fetchFacesinSphere();
+	//cout << "Searching only : " << faces_in_sphere.size()<<" faces"<<endl;
 
+	for(int i = 0; i<faces_in_sphere.size(); i++){
+		Vec3f v0 = faces_in_sphere[i].v1;
+		Vec3f v1 = faces_in_sphere[i].v2;
+		Vec3f v2 = faces_in_sphere[i].v3;
+		//cout << "Face ID " << faces_in_sphere[i].id<< "Vertex 0 "<< faces_in_sphere[i].vid[0]<<endl;
 		Vec3f d  = (v0 - point);
 		Vec3f e0 = v1 - v0;
 		Vec3f e1 = v2 - v0;
@@ -78,45 +88,41 @@ pair<float,Vec3f> ClosestPoint::minFaceDistance(const Vec3f &point, float maxRad
 			}
 		}
 	}
-	cout<<"Distance " << dmin << "faceID "<<faceID<<endl ;
+	cout << "Closest Point on Face to Query Point ";
+	cout<<min_face.x << " "<< min_face.y << " "<< min_face.z;
+	cout<<", Distance " << dmin <<endl ;
 	return std::pair<float,Vec3f>(dmin,min_face);
 }
 
 float dist_lineseg_to_point(Vec3f x0, Vec3f x1, const Vec3f p, Vec3f &result){
-	// Ditance of point P from Edge X1,X2
-	//Vec3f result;
-	//float result;
+	// Ditance of point P from Edge (X0,X1)
 
 	Vec3f v	= x1-x0;
 	Vec3f w	= p-x0;
 	//cout << "Before" << v.x << endl;
 	float c1 = w.dot(v);
 	float c2 = v.dot(v);
+
 	if (!(c1<0) && !(c2 <=c1)){
 		float b = c1/c2;
 		result = x0+ v*b;
-		//cout << "X0 "<< x0.x<<"V "<<v.x << "B " << b<<endl;
-		//cout << "result" << result.x<<endl;
-
 		return result.distance(p);
 	}
 	return INFINITY;
 }
 
+/* Loop thorough Adj List, find the distance from point to every edge*/
 pair<float,Vec3f> ClosestPoint::minEdgeDistance(const Vec3f &point, float maxRadius){
-//Vec3f ClosestPoint::minEdgeDistance(const Vec3f &point, float maxRadius){
-	// Loop thorough Adj List, find the distance from point to every edge
+
 	Vec3f minEdgePoint;
 	Vec3f result;
 	int v1,v2;
 	float dmin = INFINITY;
-	cout <<"In Point" << point.x<<endl;
+	
 	for (int i =0; i<mesh.edgeList.size(); i++){
 
-		set <int> temp = mesh.edgeList[i];
-		
-		Vec3f x1 = mesh.vertex_list[i];
-		
+		set <int> temp = mesh.edgeList[i];		
+		Vec3f x1 = mesh.vertex_list[i];		
 
 		for (set<int>::iterator j = temp.begin(); j != temp.end(); j++) {
    			int element = *j;
@@ -125,27 +131,25 @@ pair<float,Vec3f> ClosestPoint::minEdgeDistance(const Vec3f &point, float maxRad
 			if (d < (maxRadius) && d<dmin){
 				dmin = d;
 				minEdgePoint = result; 
+				edge_in_sphere.insert(i);
+				edge_in_sphere.insert(element);
 				//cout << "After "<<point.x<<endl;
 				v1 = i;
 				v2 = element;
 			}
-		}
-		
+		}		
 	}
-	cout << "Closest Edge Point ";
-	cout << minEdgePoint.x <<" "<< minEdgePoint.y <<" "<< minEdgePoint.z <<endl;
-	cout << "Vertex containing edge "<<endl;
-	cout << "V1 " << v1 << endl;//v1.x << " "<< v1.y<< " "<< v1.z<<endl;
-	cout << "V2 " << v2<<endl;//v2.x << " "<< v2.y<< " "<< v2.z<<endl;
-	cout << "Distance " << dmin<<endl;
-
+	cout << "Closest Point on Edge to Query Point ";
+	cout << minEdgePoint.x <<" "<< minEdgePoint.y <<" "<< minEdgePoint.z;
+	//cout << "Vertex containing edge "<<endl;
+	//cout << "V1 " << v1 << endl;//v1.x << " "<< v1.y<< " "<< v1.z<<endl;
+	//cout << "V2 " << v2<<endl;//v2.x << " "<< v2.y<< " "<< v2.z<<endl;
+	cout << ", Distance " << dmin<<endl;
 	return pair<float,Vec3f> (dmin,minEdgePoint);
 }
 
 void ClosestPoint::getEdgeList(){
-	int size = mesh.nverts;
-	cout << "size"<<size<<endl;
-	//std::vector<set <int> > edgeList;
+	int size = mesh.nverts;	
 	set <int> temp;
 
 	for(int i = 0; i< size; i++)
@@ -163,24 +167,14 @@ void ClosestPoint::getEdgeList(){
 			mesh.edgeList[idx1].insert(idx2);
 					
   		}
-	}
-	for (int i =0; i< mesh.edgeList.size();i++){
-		set <int> temp = mesh.edgeList[i];
-		//cout <<"Edge "<< i << " ";
-		for (set<int>::iterator j = temp.begin(); j != temp.end(); j++) {
-   			int element = *j;
-   			//cout << element << " ";
-   		}
-   		//cout<<endl;
-	}
-	
+	}	
 }
+
+
 pair<float,Vec3f> ClosestPoint::minVertexDistance(const Vec3f &point, float maxRadius){
 //Vec3f ClosestPoint::minVertexDistance(Vec3f &point, float maxRadius){
-	float dmin = std::numeric_limits<float>::infinity();
-	min_vertex_idx = std::numeric_limits<int>::infinity();
-
-	cout << "Infinity "<<dmin<<endl;
+	float dmin = INFINITY_FLOAT;
+	min_vertex_idx = INFINITY_INT;
 	Vec3f closest;
 	float d;
 	for(int i=0; i< mesh.vertex_list.size();i++){
@@ -189,12 +183,12 @@ pair<float,Vec3f> ClosestPoint::minVertexDistance(const Vec3f &point, float maxR
 			dmin = d;
 			closest = mesh.vertex_list[i];
 			min_vertex_idx = i;
-			vlist_in_sphere.push_back(closest);
+			vlist_in_sphere.insert(i);
 		}	
 	}
 	cout << "Closest Vertex to Query Point ";
-	cout << closest.x <<" "<< closest.y <<" "<< closest.z <<endl;
-	cout << "Distance " << dmin<< endl;
+	cout << closest.x <<" "<< closest.y <<" "<< closest.z;
+	cout << ", Distance " << dmin<< endl;
 	
 
 	/*if (dmin == std::numeric_limits<float>::infinity())
@@ -204,11 +198,48 @@ pair<float,Vec3f> ClosestPoint::minVertexDistance(const Vec3f &point, float maxR
 
 }
 
+/*Find distance of point on face, of only those faces which have
+vertices or edges within the maximum search radius from queryPoint*/
+
+std::vector<Face> ClosestPoint::fetchFacesinSphere(){
+	/*cout << "Valid Vertex sizes "<< vlist_in_sphere.size()<<endl;
+	cout << " Valid Edges sizes "<< edge_in_sphere.size()<<endl;*/
+
+	std::set <int> valid_verts;
+	set_union(vlist_in_sphere.begin(),vlist_in_sphere.end(),
+						edge_in_sphere.begin(), edge_in_sphere.end(),
+                  		std::inserter(valid_verts,valid_verts.begin()));
+	//cout << "Union size "<<valid_verts.size()<<endl;
+	std::vector<Face> result;
+	
+	for (int i =0; i< mesh.face_list.size(); i++){	
+		/*Create set of current face vertices*/	
+		std::set<int> temp;
+		for (int j =0; j<3; j++ ){
+			temp.insert(mesh.face_list[i].vid[j]);
+		}
+		
+		/*for (set<int>::iterator j = temp.begin(); j != temp.end(); j++) {
+   			int element = *j;
+   			cout << element<< " "<< endl;
+   		}*/
+   		/*Check interesction with Bounding Sphere*/
+   		set<int> intersect;
+		set_intersection(temp.begin(),temp.end(),valid_verts.begin(),
+						valid_verts.end(),
+                  		std::inserter(intersect,intersect.begin()));
+   		if (intersect.size()>0)
+   			result.push_back(mesh.face_list[i]);   		
+	}	
+	return result;
+
+}
+
 int main(int argc, char** argv){
 	Mesh mesh;
 	
 	//char* filename = "./bunny.ply";
-	char* filename = "data/bunny.ply";
+	char* filename = "data/happy.ply";
 
 	if (!mesh.readPly(filename)){
 		cout <<"Failed to read ply file"<<endl;
@@ -219,7 +250,8 @@ int main(int argc, char** argv){
 
 	cp(Vec3f(-0.0083935,0.065325,-0.0472749),0.01);
 	cp(Vec3f(-0.0083935,0.23,-0.0472749),0.10);
-	cp(	Vec3f(10.0,10.0,12.0),0.23);
+	cp(	Vec3f(10.0,10.0,12.0),10.0);
+	//cp.fetchFacesinSphere();
 	//Vec3f point = Vec3f(10.0,10.0,12.0);
 	//Vec3f point = Vec3f(-0.037,0.127,0.004);
 	//Vec3f point =(-0.0255083,0.112568,0.0366767);
