@@ -1,36 +1,15 @@
 #include <Mesh.h>
 #include <iostream>
 #include <exception>
+
 Mesh::Mesh(const Mesh &obj){
 	vertex_list = obj.vertex_list;
 	face_list = obj.face_list;
 	nverts = obj.nverts;
 	nfaces = obj.nfaces;
 }
-/*int** Mesh::getEdgeList(){
 
-//int size = vertex_list.size();
-int** edgeList = (int**)calloc(nverts, sizeof((int*)calloc(nverts, sizeof(int))));
-cout <<"Im here"<<face_list[0].nverts;
-
-//Loop through all faces, prepare sparse adjacency matrix
-	for (int i =0 ; i< face_list.size(); i++){
-		cout << "Begin"<<face_list.size();
-  		int n = face_list[i].nverts;
-  		cout << "N" << n;
-  		for(int i = 0; i< n;  i++){
-			int idx1 = i;
-			int idx2 = (i+1) % n;
-
-			if (edgeList[idx1][idx2] != 1)
-			edgeList[idx1][idx2] = 1;
-  		}
-	}
-	return edgeList;
-}
-
-*/
-
+/*Using Ply file lib to populate vertex and face lists*/
 bool Mesh::readPly(char *filename){
 
 typedef struct face_struct {

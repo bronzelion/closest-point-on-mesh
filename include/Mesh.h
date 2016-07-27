@@ -11,24 +11,37 @@
 using namespace std;
 using std::vector;
 using namespace math;
+
 class Mesh{
 
-public:
-	Mesh(){};
-	Mesh(const Mesh &obj);	
-	~Mesh(){};
-	
+private:
 	vector<Vec3f> vertex_list;
 	vector<Face> face_list;
 	std::vector<set <int> > edgeList;
 
-	vector<Vec3f> get_vlist();
-	vector<Face> get_flist();
+public:
 	int nverts,nfaces;
 
+	Mesh(){};
+	Mesh(const Mesh &obj);	
+	~Mesh(){};
+	
+	inline vector<Vec3f> get_vertexList(){
+		return vertex_list;
+	}
+
+	inline vector<Face> get_faceList(){
+		return face_list;
+	}
+
+	inline std::vector<set <int> > get_edgeList(){
+		return edgeList;
+	}
+	inline void set_edgeList(std::vector<set <int> > e){
+		edgeList = e;
+	}
+
 	bool readPly(char* name);
-	int** getEdgeList();
-
-
+	//int** getEdgeList();
 };
 

@@ -1,3 +1,4 @@
+/*Template class for Vector operations*/
 #pragma once
 
 #include <cmath>
