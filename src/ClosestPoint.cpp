@@ -77,7 +77,7 @@ pair<float,Vec3f> ClosestPoint::minFaceDistance(const Vec3f &point, float maxRad
 		float t   = tv.length();
 
 		if((s+t <= det) && (s>=0) && (t>=0)){			
-			float inv = 1/det;
+			double inv = 1/det;
 			s *= inv;
 			t*= inv;
 			Vec3f result = v0 + e0*s + e1*t;
@@ -92,6 +92,7 @@ pair<float,Vec3f> ClosestPoint::minFaceDistance(const Vec3f &point, float maxRad
 	cout << "Closest Point on Face to Query Point ";
 	cout<<min_face.x << " "<< min_face.y << " "<< min_face.z;
 	cout<<", Distance " << dmin <<endl ;
+	cout << "Face ID " << faceID<<endl;
 	return std::pair<float,Vec3f>(dmin,min_face);
 }
 
@@ -227,39 +228,4 @@ std::vector<Face> ClosestPoint::fetchFacesinSphere(){
    			result.push_back(face_list[i]);   		
 	}	
 	return result;
-}
-
-int main(int argc, char** argv){
-	Mesh mesh;
-	char* filename = "data/bunny.ply";
-
-	if(argc ==2){
-		std::string argv1 = argv[1];		
-		if((argv1 == "-h" )|| (argv1 == "--help")){
-			cout <<"Usage: ./ClosestPoint [path to ply file]"<<endl;
-			cout << "Default ply: ./data/bunny.ply"<<endl;
-			exit(0);
-		}
-		else
-			filename = argv[1];		
-	}
-
-	cout << "Reading file: "<<filename<<endl;	
-
-	/*Populate Mesh Data structure from the Ply file*/
-	if (!mesh.readPly(filename)){
-		cout <<"Failed to read ply file "<< filename<<endl;
-		return 1;
-	}
-
-	ClosestPoint cp = ClosestPoint(mesh);
-
-	/*Run the algorithm*/
-	/*Picking random points and search radius*/
-	cp(Vec3f(-0.0083935,0.065325,-0.0472749),10.01);
-	cp(Vec3f(-0.0083935,0.23,-0.0472749),0.10);
-	cp(Vec3f(10.0,10.0,12.0),10.0);
-	cp(Vec3f(1.92575,0.186903,2),30);
-	
-	return 0;
 }
