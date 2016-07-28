@@ -26,6 +26,7 @@ public:
 	Mesh(const Mesh &obj);	
 	~Mesh(){};
 	
+	/*Getters and Setters for Mesh atributes*/
 	inline vector<Vec3f> get_vertexList(){
 		return vertex_list;
 	}
@@ -42,6 +43,5 @@ public:
 	}
 
 	bool readPly(char* name);
-	//int** getEdgeList();
 };
 

@@ -5,6 +5,7 @@
 
 #define INFINITY_FLOAT std::numeric_limits<float>::infinity();
 
+/*Test case to validate if the point is in bounds*/
 bool pointInSphere(Vec3f result, Vec3f queryPoint, float radius){
  	if (result == NULL)
  		return true;
@@ -13,6 +14,7 @@ bool pointInSphere(Vec3f result, Vec3f queryPoint, float radius){
  			pow(result.z-queryPoint.z,2) <= pow(radius,2));
 }
 
+/*Helper function*/
 bool barycentric (Vec3f a, Vec3f b, Vec3f c, Vec3f p){
 	Vec3f v0 = c -a ;
 	Vec3f v1 = b -a ;
@@ -27,11 +29,11 @@ bool barycentric (Vec3f a, Vec3f b, Vec3f c, Vec3f p){
 	double invDenom = 1 / (dot00 * dot11 - dot01 * dot01);
 	double u = (dot11 * dot02 - dot01 * dot12) * invDenom;
 	double v = (dot00 * dot12 - dot01 * dot02) * invDenom;
-	//cout << "U "<< u << " v " << v << endl;
+
 	return (u >= 0) && (v >= 0) && (u + v <= 1);
-
-
 }
+
+/*Test case to check if the point actually exists on the mesh*/
 bool pointOnMesh(Vec3f output,Mesh m){
 	if (output == NULL)
  		return true;
@@ -45,9 +47,10 @@ bool pointOnMesh(Vec3f output,Mesh m){
  	return false;
 }
 
+/*Boost Test Main*/
 int test_main(int argc, char** argv){
 	Mesh mesh;
-	char* filename = "./data/bunny.ply";
+	char* filename = "./data/bunny.ply";	 //Default input mesh
 
 	if(argc ==2){
 		std::string argv1 = argv[1];		
@@ -69,25 +72,18 @@ int test_main(int argc, char** argv){
 		return 1;
 	}
 
-	ClosestPoint cp = ClosestPoint(mesh);
-
-    
+	ClosestPoint cp = ClosestPoint(mesh);    
 
 	/*Read query points from a file and run the algorithm!*/
 	std::ifstream infile("./data/queryPoints.txt");
 	float x,y,z,searchRadius;
+	
 	while(infile >>x >> y >> z >> searchRadius){		
 		Vec3f queryPoint = Vec3f(x,y,z);
 		Vec3f output = cp(queryPoint,searchRadius);		
 
 		BOOST_CHECK(pointInSphere(output,queryPoint,searchRadius) == true);
 		BOOST_CHECK(pointOnMesh(output,cp.getMesh()) == true);
-
-		/*barycentric(Vec3f(0.0545285,0.0622324,0.0277996),Vec3f(.0553211,0.0622297,0.0271921),
-			Vec3f(0.0545857,0.0608947,0.0278753))*/
 	}	
-
-
-	
 	return 0;
 }
