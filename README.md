@@ -16,5 +16,13 @@ A simple C++ implementation to find a closest  point on a mesh to a given extern
 ```
 The test cases read the query points from `data/queryPoints.txt`. Each line is a space separated value of the cordinates followed by the search radius value
 
+###Data used for testing
+Ply file |Vertices | Faces
+------------ | -------------|-------------
+bunny.ply | 35947 | 69451 
+hand.ply | 327323 | 654666
+happy.ply |  543652 | 1087716
+
+###[Detailed Wiki](https://github.com/bronzelion/closest-point-on-mesh/wiki/Closest-Point-on-a-Mesh-:-Background-and-Approaches)
 
 
