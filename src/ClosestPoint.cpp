@@ -91,8 +91,7 @@ pair<float,Vec3f> ClosestPoint::minFaceDistance(const Vec3f &point, float maxRad
 	}
 	cout << "Closest Point on Face to Query Point ";
 	cout<<min_face.x << " "<< min_face.y << " "<< min_face.z;
-	cout<<", Distance " << dmin <<endl ;
-	cout << "Face ID " << faceID<<endl;
+	cout<<", Distance " << dmin <<endl ;	
 	return std::pair<float,Vec3f>(dmin,min_face);
 }
 
